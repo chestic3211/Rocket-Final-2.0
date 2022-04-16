@@ -16,11 +16,8 @@
 #define RFM69_INT     digitalPinToInterrupt(2)  // only pins 0, 1, 2 allowed
 #define RF69_FREQ     433.0
 RH_RF69 rf69(RFM69_CS,RFM69_INT);
-
 BlueDot_BME280 bme280 = BlueDot_BME280();
-
 MPU6050 mpu;
-
 PWMServo myservo; // create servo object to control a servo
 PWMServo myservo1;
 
@@ -59,8 +56,6 @@ float perror_X = 0; // p == previous
 float perror_Y = 0;
 float setangleX = 0;
 float setangleY = 0;
-float ppitch = 0;
-float proll = 0;
 float kp = 0.55;
 float ki = 0.25;
 float kd = 0.085;
@@ -71,11 +66,12 @@ float iLimitY = 0;
 uint32_t timer;   // count dt
 
 // settings
-int status2 = 0; // ground reciver send back message 0 = normal mode 2 = check mode 3 = calibrate mode 1 = launch mode 4 = landing mode
-int Status = 0;
+int status2 = 0; // ground reciver send back message 0 = normal mode 2 = check mode 3 = calibrate mode 1 = launch mode 4 = landing mode 
+int Status = 0; // 5 = finished 1 = land 2 = launch 6 = stable
 int status1 = 0; // keep running launch until hit
 int millis1;
 int millis2;
+int millis3;
 int count1 = 0;
 
 
@@ -268,7 +264,8 @@ void loop()
     rf69.send((uint8_t *)buffer, sizeof(buffer));
     rf69.waitPacketSent();
 
-    if (millis() > millis1+500){
+    int millis5 = millis();
+    if (millis5 > millis1+500 && status2 != 1){
       Status = 0;
     }
 
@@ -288,13 +285,13 @@ void loop()
     digitalWrite(LED2, HIGH);
     digitalWrite(LED3, LOW);
   }
+
   //check mode
   if (status2 == 2){
     digitalWrite(LED, LOW);
     digitalWrite(LED2, HIGH);
     digitalWrite(LED3, HIGH);
     delay(1000);
-    Status = 2;
 
 
     // X axis
@@ -340,6 +337,7 @@ void loop()
     delay(1000);
     status2 = 0;
     millis1 = millis();
+    Status = 5;
   }
 
   if (status2 == 3){
@@ -348,6 +346,7 @@ void loop()
     delay(5000);
     status2 = 0;
     millis1 = millis();
+    Status = 5;
   }
 
 
@@ -467,11 +466,24 @@ void loop()
 
     float accelz = float((az * 0.061 / 1000) - 1);
     status1 = 1;
+    int millis4 = millis();
+    if (pitch <= 1 && pitch >= -1 && roll <= 1 && roll >= -1 && millis4 >= millis3+5000){
+      Status = 6;
+    }else{
+      Status = 2;
+    }
+    
+    if (count1 == 0){
+      millis3 = millis();
+      count1 = 1;
+    }
+
     if (accelz < -2.5){
       Status = 1;
       status2 = 0;
       status1 = 0;
       millis1 = millis();
+      count1 = 0;
       posX = 0;
       posY = 0;
     }

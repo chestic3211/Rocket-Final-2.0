@@ -528,13 +528,24 @@ void draw() {
   }
  
   //launch millis() > mil + 2000 && 
-  if (status1 == 1){
+  if (status1 == 1 || status2.equals("2")){
     statusbox8();
     if (status2.equals("1")){
       status1 = 10;
       stay = 0;
     }
   }
+
+  // finished
+  if (status2.equals("5")){
+    statusbox3();
+  }
+
+  // stable
+  if (status2.equals("6")){
+    statusbox4();
+  }
+
   //land
   if (status1 == 10 || status2.equals("1")){
     statusbox9();
@@ -608,7 +619,7 @@ void statusbox(){
 }
 
 void statusbox1(){
-  fill(0,0,255);  
+  fill(255,215,0);  
   rect(1330, 350, 380, 130, 20);
   textSize(50);
   fill(255);
@@ -616,11 +627,27 @@ void statusbox1(){
 }
 
 void statusbox2(){
-  fill(0,0,255);  
+  fill(255,215,0);  
   rect(1330, 350, 380, 130, 20);
   textSize(45);
   fill(255);
   text("Calibrate Gyro Accel", 1710, 430);
+}
+
+void statusbox3(){
+  fill(76,187,23);  
+  rect(1330, 350, 380, 130, 20);
+  textSize(50);
+  fill(255);
+  text("Finished", 1610, 430);
+}
+
+void statusbox4(){
+  fill(76,187,23);  
+  rect(1330, 350, 380, 130, 20);
+  textSize(50);
+  fill(255);
+  text("Stable", 1590, 430);
 }
 
 
