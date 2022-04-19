@@ -5,6 +5,7 @@
 #include <PWMServo.h>
 #include <SPI.h>
 #include <RH_RF69.h>
+#include <SD.h>
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
@@ -36,6 +37,13 @@ VectorFloat gravity; // [x, y, z]            gravity vector
 float ypr[3];        // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
+
+// sd card
+const int chipSelect = 10;
+const char filename[] = "datalog.txt";
+File myFile;
+// string to buffer output
+String dataBuffer;
 
 // servo
 int posX = 0;
@@ -197,6 +205,18 @@ void setup()
     Serial.println(F(")"));
   }
 
+  
+  //sd card
+  dataBuffer.reserve(2048);
+  if (!SD.begin(chipSelect)) {
+    Serial.println("initialization failed. Things to check:");
+    Serial.println("1. is a card inserted?");
+    Serial.println("2. is your wiring correct?");
+    Serial.println("3. did you change the chipSelect pin to match your shield or module?");
+    Serial.println("Note: press reset or reopen this Serial Monitor after fixing your issue!");
+    while (true);
+  }
+
   //For Teensy 3.x and T4.x the following format is required to operate correctly
   pinMode(RFM69_RST, OUTPUT);
   digitalWrite(RFM69_RST, LOW);
@@ -222,6 +242,8 @@ void setup()
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   rf69.setEncryptionKey(key);
+  
+
 
   // LED light turn RED
   digitalWrite(LED, LOW);
@@ -464,6 +486,7 @@ void loop()
     servoX(posX);
     servoY(posY);
 
+
     float accelz = float((az * 0.061 / 1000) - 1);
     status1 = 1;
     int millis4 = millis();
@@ -477,6 +500,35 @@ void loop()
       millis3 = millis();
       count1 = 1;
     }
+
+    /*
+    // sd card
+    dataBuffer += accelz;
+    dataBuffer += ",";
+    dataBuffer += millis2;
+    dataBuffer += ",";
+    dataBuffer += pitch;
+    dataBuffer += ",";
+    dataBuffer += roll;
+    dataBuffer += ",";
+    dataBuffer += posX;
+    dataBuffer += ",";
+    dataBuffer += posY;
+    dataBuffer += ",";
+    dataBuffer += PIDX;
+    dataBuffer += ",";
+    dataBuffer += PIDY;
+    dataBuffer += "\r\n";
+
+    // check if the SD card is available to write data without blocking
+    // and if the dataBuffered data is enough for the full chunk size
+    unsigned int chunkSize = myFile.availableForWrite();
+    if (chunkSize && dataBuffer.length() >= chunkSize) {
+      myFile.write(dataBuffer.c_str(), chunkSize);
+      // remove written data from dataBuffer
+      dataBuffer.remove(0, chunkSize);
+    }
+    */
 
     if (accelz < -2.5){
       Status = 1;

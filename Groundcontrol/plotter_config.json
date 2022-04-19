@@ -1,16 +1,16 @@
 {
   "lgMinY4": "0.0",
-  "lgMinY5": "-26.0",
-  "lgMinY2": "-6.0",
-  "lgMinY3": "-4.0",
-  "lgMinY6": "-9.0",
-  "lgMinY7": "-6.0",
-  "lgMaxY7": "20.2",
-  "lgMaxY6": "20.0",
-  "lgMaxY5": "26.0",
-  "lgMaxY4": "601.0",
-  "lgMaxY3": "6.0",
-  "lgMaxY2": "7.0",
+  "lgMinY5": "-25",
+  "lgMinY2": "-12.0",
+  "lgMinY3": "-8.0",
+  "lgMinY6": "-20.5",
+  "lgMinY7": "-13.4",
+  "lgMaxY7": "20.8",
+  "lgMaxY6": "6.0",
+  "lgMaxY5": "25",
+  "lgMaxY4": "579.0",
+  "lgMaxY3": "22.0",
+  "lgMaxY2": "5.0",
   "lgMaxY1": "2.0",
-  "lgMinY1": "-2.0"
+  "lgMinY1": "-3.3"
 }

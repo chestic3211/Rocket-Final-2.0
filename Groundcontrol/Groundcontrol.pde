@@ -331,7 +331,7 @@ void draw() {
   }
 
   try{
-
+    
     if (float(nums[0]) > nnum1){
       nnum1 = float(nums[0]);
     }
@@ -358,7 +358,7 @@ void draw() {
     if (float(nums[10]) > nnum7){
       nnum7 = float(nums[10]);
     }
-
+    
     num1 = String.valueOf(nnum1+1);
     num2 = String.valueOf(nnum2);
     num3 = String.valueOf(nnum3);
@@ -401,6 +401,7 @@ void draw() {
     numm5 = String.valueOf(nuum5-1);
     numm6 = String.valueOf(nuum6-5);
     numm7 = String.valueOf(nuum7-5);
+    
 
 
     // lalala
@@ -527,8 +528,8 @@ void draw() {
     statusbox2();
   }
  
-  //launch millis() > mil + 2000 && 
-  if (status1 == 1 || status2.equals("2")){
+  //launch millis() > mil + 2000 &&   status1 == 1 || 
+  if (status1 == 1 || status2.equals("2") && status1 != -1){
     statusbox8();
     if (status2.equals("1")){
       status1 = 10;
