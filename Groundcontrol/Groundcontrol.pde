@@ -83,6 +83,7 @@ String miil;
 int miii = 0;
 String status2 = "0"; // working status
 int stay;
+String[] serialnum;
 
 void setup() {
   surface.setTitle("Ground Control");
@@ -119,7 +120,7 @@ void setup() {
   setChartSettings();
 
   // button
-  font = createFont("", 25);
+  font = createFont("arial", 25);
 
   cp5.addButton("LAUNCH")
     .setColorBackground(color(200,0,0))
@@ -139,7 +140,15 @@ void setup() {
     .setSize(350, 80)
     .setFont(font)
     ;
+  cp5.addButton("test")
+    .setColorBackground(color(0,128,0))
+    .setPosition(1350, 505)
+    .setSize(350, 80)
+    .setFont(font)
+    ;
 
+  //cp5.addTextfield("setposX").setPosition(1330, 500).setSize(180, 80).setText(getPlotterConfigString("setposX")).setFont(font).setAutoClear(false);
+  //cp5.addTextfield("setposY").setPosition(1530, 500).setSize(180, 80).setText(getPlotterConfigString("setposY")).setFont(font).setAutoClear(false);
   // build x axis values for the line graph
   for (int i=0; i<lineGraphValues1.length; i++) {
     for (int k=0; k<lineGraphValues1[0].length; k++) {
@@ -210,7 +219,7 @@ void setup() {
 
 }
 
-byte[] inBuffer = new byte[100]; // holds serial message
+byte[] inBuffer = new byte[500]; // holds serial message
 int i = 0; // loop variable
 void draw() {
   /* Read serial and update values */
@@ -221,7 +230,7 @@ void draw() {
   println(myString);
 
   // split the string at delimiter
-  String[] nums = split(myString, ':');
+  String[] nums = split(myString, ":");
   
   // csvv file
   try {
@@ -332,72 +341,34 @@ void draw() {
 
   try{
     
-    if (float(nums[0]) > nnum1){
-      nnum1 = float(nums[0]);
-    }
-    if (int(nums[1]) > nnum2){
-      nnum2 = int(nums[1]);
-    }
-    if (int(nums[2]) > nnum3){
-      nnum3 = int(nums[2]);
-    }
-    if (int(nums[3]) > nnum4){
-      nnum4 = int(nums[3]);
-    }
-    if (int(nums[4]) > int(nums[5])){
-      int mun = int(nums[4]);
-    }else{
-      mun = int(nums[5]);
-    }
-    if (mun > nnum5){
-      nnum5 = mun;
-    }
-    if (float(nums[9]) > nnum6){
-      nnum6 = float(nums[9]);
-    }
-    if (float(nums[10]) > nnum7){
-      nnum7 = float(nums[10]);
-    }
+    nnum1 = max(lineGraphValues1[0]);
+    nnum2 = max(lineGraphValues2[0]);
+    nnum3 = max(lineGraphValues3[0]);
+    nnum4 = max(lineGraphValues4[0]);
     
+    nnum6 = max(lineGraphValues6[0]);
+    nnum7 = max(lineGraphValues7[0]);
+
     num1 = String.valueOf(nnum1+1);
-    num2 = String.valueOf(nnum2);
-    num3 = String.valueOf(nnum3);
+    num2 = String.valueOf(nnum2+1);
+    num3 = String.valueOf(nnum3+1);
     num4 = String.valueOf(nnum4+100);
     num5 = String.valueOf(nnum5+1);
     num6 = String.valueOf(nnum6+5);
     num7 = String.valueOf(nnum7+5);
 
-    if (float(nums[0]) < nuum1){
-      nuum1 = float(nums[0]);
-    }
-    if (int(nums[1]) < nuum2){
-      nuum2 = int(nums[1]);
-    }
-    if (int(nums[2]) < nuum3){
-      nuum3 = int(nums[2]);
-    }
-    if (int(nums[3]) < nuum4){
-      nuum4 = int(nums[3]);
-    }
-    if (int(nums[4]) < int(nums[5])){
-      int muun = int(nums[4]); 
-    }else{
-      muun = int(nums[5]);
-    }
-    if (muun < nuum5){
-      nuum5 = muun;
-    }
-    if (float(nums[9]) < nuum6){
-      nuum6 = float(nums[9]);
-    }
-    if (float(nums[10]) < nuum7){
-      nuum7 = float(nums[10]);
-    }
+    nuum1 = min(lineGraphValues1[0]);
+    nuum2 = min(lineGraphValues2[0]);
+    nuum3 = min(lineGraphValues3[0]);
+    //nuum4 = min(lineGraphValues4[0]);
+    
+    nuum6 = min(lineGraphValues6[0]);
+    nuum7 = min(lineGraphValues7[0]);
 
     numm1 = String.valueOf(nuum1-1);
-    numm2 = String.valueOf(nuum2);
-    numm3 = String.valueOf(nuum3);
-    numm4 = String.valueOf(nuum4);
+    numm2 = String.valueOf(nuum2-1);
+    numm3 = String.valueOf(nuum3-1);
+    numm4 = String.valueOf(0);
     numm5 = String.valueOf(nuum5-1);
     numm6 = String.valueOf(nuum6-5);
     numm7 = String.valueOf(nuum7-5);
@@ -561,16 +532,24 @@ void draw() {
   }
 }
 
+// it just a test will be deleted soon
+void test(){
+  serialPort.write('4');
+}
+
 void LAUNCH(){
+  //serialnum[0] = '1';
   serialPort.write('1');
   status1 = 1;
 }
 
 void Check(){
+  //serialnum[0] = '2';
   serialPort.write('2');
   status1 = 2;
 }
 void Calibrate(){
+  //serialnum[0] = '3';
   serialPort.write('3');
   status1 = 3;
 }
@@ -733,8 +712,27 @@ void setChartSettings() {
   LineGraph7.yMax=int(getPlotterConfigString("lgMaxY7")); 
   LineGraph7.yMin=int(getPlotterConfigString("lgMinY7"));
 }
-
-
+/*
+void controlEvent(ControlEvent theEvent) {
+  if (theEvent.isAssignableFrom(Textfield.class)){
+    String parameter = theEvent.getName();
+    String value = "";
+    if (theEvent.isAssignableFrom(Textfield.class)){
+      value = theEvent.getStringValue();
+      //serialnum[1] = value; 
+      if (parameter == "posX"){
+        //serialPort.write(value+':');
+      }
+      if (parameter == "posY"){
+        //serialPort.write(value+';');
+      }
+    }
+    plotterConfigJSON.setString(parameter, value);
+    saveJSONObject(plotterConfigJSON, topSketchPath+"/plotter_config.json");
+  }
+  setChartSettings();
+}
+*/
 // get gui settings from settings file
 String getPlotterConfigString(String id) {
   String r = "";

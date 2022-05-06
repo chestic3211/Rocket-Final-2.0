@@ -81,6 +81,7 @@ int millis1;
 int millis2;
 int millis3;
 int count1 = 0;
+char * status5;
 
 
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
@@ -205,8 +206,15 @@ void setup()
     Serial.println(F(")"));
   }
 
-  
+  //pinMode(10, OUTPUT);
+  //pinMode(9, OUTPUT);
+  //digitalWrite(10, LOW);
+
+  //digitalWrite(9, HIGH);
+
+  /*
   //sd card
+  
   dataBuffer.reserve(2048);
   if (!SD.begin(chipSelect)) {
     Serial.println("initialization failed. Things to check:");
@@ -216,6 +224,9 @@ void setup()
     Serial.println("Note: press reset or reopen this Serial Monitor after fixing your issue!");
     while (true);
   }
+
+  digitalWrite(10, HIGH);
+  */
 
   //For Teensy 3.x and T4.x the following format is required to operate correctly
   pinMode(RFM69_RST, OUTPUT);
@@ -236,14 +247,12 @@ void setup()
   }
   // If you are using a high power RF69, you *must* set a Tx power in the
   // range 14 to 20 like this:
-   rf69.setTxPower(16, true);
+  rf69.setTxPower(16, true);
 
   // The encryption key has to be the same as the one in the server
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   rf69.setEncryptionKey(key);
-  
-
 
   // LED light turn RED
   digitalWrite(LED, LOW);
@@ -282,7 +291,8 @@ void loop()
     millis2 = millis();
     // send data
     char buffer[50];
-    sprintf(buffer, "%.1f:%d:%d:%d:%d:%d:%d:%d:%d:%.1f:%.1f:%d:%d:%d", accelz, pitch, roll, alttitude, posX, posY, humidity, pressure, temper, PIDX, PIDY, Status, millis2, 8);  
+    int nouse = 8;
+    sprintf(buffer, "%.1f:%d:%d:%d:%d:%d:%d:%d:%d:%.1f:%.1f:%d:%d:%d", accelz, pitch, roll, alttitude, posX, posY, humidity, pressure, temper, PIDX, PIDY, Status, millis2, nouse);  
     rf69.send((uint8_t *)buffer, sizeof(buffer));
     rf69.waitPacketSent();
 
@@ -298,7 +308,12 @@ void loop()
       // Should be a reply message for us now  
       if (status1 == 0){ 
         if (rf69.recv(buf, &len)){
-          status2 =  atoi((char *)buf);
+          status2 = atoi((char *)buf);
+          //status5 = strtok((char *)buf, ":");
+          //status2 =  atoi((char *)status5[0]);
+          //setangleX =  atoi((char *)status5[1]);
+          //setangleY = atoi((char *)status5[2]);
+          //Serial.println(status5);
         }
       }
     }
@@ -453,8 +468,8 @@ void loop()
 
 
     // sum 3 pid values
-    PIDX = pidX_p + pidX_i + kd * pidX_d; 
-    PIDY = pidY_p + pidY_i + kd * pidY_d;
+    PIDX = pidX_p + pidX_i + pidX_d; 
+    PIDY = pidY_p + pidY_i + pidY_d;
     // turn pid value to servo value
     posX = PIDX * 2 + servoalignmentX;
     posY = PIDY * 2 + servoalignmentY;
