@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <RH_RF69.h>
 #include <SD.h>
+#include <buzzer.h>
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
@@ -39,11 +40,11 @@ int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
 // sd card
-const int chipSelect = 10;
-const char filename[] = "datalog.txt";
-File myFile;
+//const int chipSelect = 10;
+//const char filename[] = "datalog.txt";
+//File myFile;
 // string to buffer output
-String dataBuffer;
+//String dataBuffer;
 
 // servo
 int posX = 0;
@@ -84,6 +85,9 @@ int count1 = 0;
 char * status5;
 
 
+int times;
+
+
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 
 void dmpDataReady()
@@ -109,6 +113,7 @@ void setup()
     Fastwire::setup(400, true);
   #endif
   Serial.begin(115200);
+  //catkeymusic();
 
   // LED light
   pinMode(LED, OUTPUT);
@@ -151,6 +156,7 @@ void setup()
     Serial.println(F("Ops! BME280 could not be found!"));
     Serial.println(F("Please check your connections."));
     Serial.println();
+    musicdied();
     while (1)
       ;
   }
@@ -204,6 +210,7 @@ void setup()
     Serial.print(F("DMP Initialization failed (code "));
     Serial.print(devStatus);
     Serial.println(F(")"));
+    musicdied();
   }
 
   //pinMode(10, OUTPUT);
@@ -239,11 +246,13 @@ void setup()
   
   if (!rf69.init()){
     Serial.println("init failed");
+    musicdied();
   }
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
   // No encryption
   if (!rf69.setFrequency(433.0)){
     Serial.println("setFrequency failed");
+    musicdied();
   }
   // If you are using a high power RF69, you *must* set a Tx power in the
   // range 14 to 20 like this:
@@ -262,11 +271,18 @@ void setup()
   digitalWrite(LED, LOW);
   digitalWrite(LED2, LOW);
   digitalWrite(LED3, LOW);
+  //musicdied();
+  //musicpirates();
+  //starwarsmusic();
+  //rickrollmusic();
+  //supermario();
+  //pinkmusic();
 }
 
 void loop()
 {
-  if (status2 == 0 || status2 == 1){
+
+  if (status2 == 0 || status2 == 1 || status2 == 4){
     // mpu6050
     mpu.dmpGetCurrentFIFOPacket(fifoBuffer);
     // display Euler angles in degrees
@@ -309,11 +325,6 @@ void loop()
       if (status1 == 0){ 
         if (rf69.recv(buf, &len)){
           status2 = atoi((char *)buf);
-          //status5 = strtok((char *)buf, ":");
-          //status2 =  atoi((char *)status5[0]);
-          //setangleX =  atoi((char *)status5[1]);
-          //setangleY = atoi((char *)status5[2]);
-          //Serial.println(status5);
         }
       }
     }
@@ -325,10 +336,12 @@ void loop()
 
   //check mode
   if (status2 == 2){
+
     digitalWrite(LED, LOW);
     digitalWrite(LED2, HIGH);
     digitalWrite(LED3, HIGH);
     delay(1000);
+    musicpirates();
 
 
     // X axis
@@ -378,12 +391,154 @@ void loop()
   }
 
   if (status2 == 3){
+    rickrollmusic();
     mpu.CalibrateAccel(6);
     mpu.CalibrateGyro(6);
     delay(5000);
     status2 = 0;
     millis1 = millis();
     Status = 5;
+  }
+
+
+  //test
+  if (status2 == 4){
+    mpu.dmpGetCurrentFIFOPacket(fifoBuffer);
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    mpu.dmpGetGravity(&gravity, &q);
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+    int roll = ypr[2] * 180 / M_PI;   //  define roll
+    int pitch = ypr[1] * 180 / M_PI;  //  define pitch
+
+    // PID controller------------------------------------------
+
+    double dt = (double)(micros() - timer) / 1000000; // count time
+    timer = micros();
+
+    // set error
+    error_X = pitch - setangleX; 
+    error_Y = roll - setangleY;
+
+    // define Proportional term
+    pidX_p = kp * error_X;
+    pidY_p = kp * error_Y;
+
+    // define Derivative term
+    pidX_d = (2 * kd * (error_X - perror_X) + (2 * tau - dt) * pidX_d) / (2 * tau + dt);
+    pidY_d = (2 * kd * (error_Y - perror_Y) + (2 * tau - dt) * pidY_d) / (2 * tau + dt);
+
+    // define Integal term
+    pidX_i += ki * dt * error_X;
+    pidY_i += ki * dt * error_Y;
+
+    // limit
+    pidXP = pidX_p;
+    pidYP = pidY_p;
+
+    if (pidXP > maxAngle) {
+      pidXP = maxAngle;
+    }
+    if (pidXP < maxAngle * -1){
+      pidXP = maxAngle * -1;
+    }
+    if (pidYP > maxAngle) {
+      pidYP = maxAngle;
+    }
+    if (pidYP < maxAngle * -1){
+      pidYP = maxAngle * -1;
+    }
+    
+    if (pidX_p > 0){
+      iLimitX = maxAngle - pidXP;
+    }
+    if (pidX_p < 0){
+      iLimitX = maxAngle + pidXP;
+    }
+    if (pidY_p > 0){
+      iLimitY = maxAngle - pidYP;
+    }
+    if (pidY_p < 0){
+      iLimitY = maxAngle + pidYP;
+    }
+
+    if (pidX_i > iLimitX){
+      pidX_i = iLimitX;
+    }
+    if (pidX_i < iLimitX * -1){
+      pidX_i = iLimitX * -1;
+    }
+    if (pidY_i > iLimitY){
+      pidY_i = iLimitY;
+    }
+    if (pidY_i < iLimitY * -1){
+      pidY_i = iLimitY * -1;
+    }
+
+    perror_X = error_X; // define previous error X
+    perror_Y = error_Y; // define previous error Y
+
+
+    // sum 3 pid values
+    PIDX = pidX_p + pidX_i + pidX_d; 
+    PIDY = pidY_p + pidY_i + pidY_d;
+    // turn pid value to servo value
+    posX = PIDX * 2 + servoalignmentX;
+    posY = PIDY * 2 + servoalignmentY;
+
+    
+
+    // set servo X maximum
+    if (posX > servoalignmentX + servoflex)
+    {
+      posX = servoalignmentX + servoflex;
+    }
+
+    if (posX < servoalignmentX - servoflex)
+    {
+      posX = servoalignmentX - servoflex;
+    }
+
+    // set servo Y maximum
+    if (posY > servoalignmentY + servoflex)
+    {
+      posY = servoalignmentY + servoflex;
+    }
+
+    if (posY < servoalignmentY - servoflex)
+    {
+      posY = servoalignmentY - servoflex;
+    }
+
+    servoX(posX);
+    servoY(posY);
+
+    if (times == 0){
+      setangleY = 10;
+    }
+
+    if (roll == 10 && times == 0){
+      times = 1;
+      setangleY = -10;
+    }
+
+    if (roll == -10 && times == 1){
+      times = 2;
+      setangleY = 0;
+      setangleX = 10;
+    } 
+    if (pitch == 10 && times == 2){
+      times = 3;
+      setangleX = -10;
+    } 
+    if (pitch == -10 && times == 3){
+      setangleX = 0;
+      times = 0;
+      Status = 5;
+      status2 = 0;
+    } 
   }
 
 
@@ -545,7 +700,7 @@ void loop()
     }
     */
 
-    if (accelz < -2.5){
+    if (accelz < -1.5){
       Status = 1;
       status2 = 0;
       status1 = 0;

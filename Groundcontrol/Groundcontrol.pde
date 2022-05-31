@@ -498,6 +498,10 @@ void draw() {
   if (status1 == 3){
     statusbox2();
   }
+
+  if (status1 == 4 && !status2.equals("5")){
+    statusbox5();
+  }
  
   //launch millis() > mil + 2000 &&   status1 == 1 || 
   if (status1 == 1 || status2.equals("2") && status1 != -1){
@@ -535,21 +539,19 @@ void draw() {
 // it just a test will be deleted soon
 void test(){
   serialPort.write('4');
+  status1 = 4;
 }
 
 void LAUNCH(){
-  //serialnum[0] = '1';
   serialPort.write('1');
   status1 = 1;
 }
 
 void Check(){
-  //serialnum[0] = '2';
   serialPort.write('2');
   status1 = 2;
 }
 void Calibrate(){
-  //serialnum[0] = '3';
   serialPort.write('3');
   status1 = 3;
 }
@@ -571,6 +573,7 @@ void groundControl(String hum, String pres, String tempe){
   text("Pressure: "+pres+"Pa", 1670, 270);
   text("Temperature: "+tempe+"°C", 1670, 310);
 }
+
 
 void controlPanel(){
   stroke(255, 255, 255);
@@ -630,6 +633,13 @@ void statusbox4(){
   text("Stable", 1590, 430);
 }
 
+void statusbox5(){
+  fill(0,0,255);  
+  rect(1330, 350, 380, 130, 20);
+  textSize(50);
+  fill(255);
+  text("TEST", 1580, 430);
+}
 
 void statusbox8(){
   fill(57,255,20);  
