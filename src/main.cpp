@@ -7,7 +7,7 @@
 #include <RH_RF69.h>
 #include <SD.h>
 #include <buzzer.h>
-
+//22 tvc down 23 tvc up
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
 #endif
@@ -40,17 +40,17 @@ int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
 // sd card
-//const int chipSelect = 10;
-//const char filename[] = "datalog.txt";
-//File myFile;
-// string to buffer output
-//String dataBuffer;
+const int chipSelect = 10;
+const char filename[] = "datalog.txt";
+File myFile;
+//string to buffer output
+String dataBuffer;
 
 // servo
 int posX = 0;
 int posY = 0;
 float servoalignmentX = 95;
-float servoalignmentY = 65;
+float servoalignmentY = 0;
 float servoflex = 25;
 
 // LED light
@@ -214,14 +214,14 @@ void setup()
   }
 
   //pinMode(10, OUTPUT);
-  //pinMode(9, OUTPUT);
+ // pinMode(9, OUTPUT);
   //digitalWrite(10, LOW);
 
   //digitalWrite(9, HIGH);
 
-  /*
-  //sd card
   
+  //sd card
+  /*
   dataBuffer.reserve(2048);
   if (!SD.begin(chipSelect)) {
     Serial.println("initialization failed. Things to check:");
@@ -231,9 +231,9 @@ void setup()
     Serial.println("Note: press reset or reopen this Serial Monitor after fixing your issue!");
     while (true);
   }
-
+*/
   digitalWrite(10, HIGH);
-  */
+  
 
   //For Teensy 3.x and T4.x the following format is required to operate correctly
   pinMode(RFM69_RST, OUTPUT);
@@ -306,6 +306,7 @@ void loop()
 
     millis2 = millis();
     // send data
+    
     char buffer[50];
     int nouse = 8;
     sprintf(buffer, "%.1f:%d:%d:%d:%d:%d:%d:%d:%d:%.1f:%.1f:%d:%d:%d", accelz, pitch, roll, alttitude, posX, posY, humidity, pressure, temper, PIDX, PIDY, Status, millis2, nouse);  
@@ -671,7 +672,7 @@ void loop()
       count1 = 1;
     }
 
-    /*
+    
     // sd card
     dataBuffer += accelz;
     dataBuffer += ",";
@@ -689,7 +690,7 @@ void loop()
     dataBuffer += ",";
     dataBuffer += PIDY;
     dataBuffer += "\r\n";
-
+/*
     // check if the SD card is available to write data without blocking
     // and if the dataBuffered data is enough for the full chunk size
     unsigned int chunkSize = myFile.availableForWrite();
@@ -698,8 +699,8 @@ void loop()
       // remove written data from dataBuffer
       dataBuffer.remove(0, chunkSize);
     }
-    */
-
+    
+*/
     if (accelz < -1.5){
       Status = 1;
       status2 = 0;
@@ -711,4 +712,4 @@ void loop()
     }
   }
   delay(10);
-}
+  }
