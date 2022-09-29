@@ -1,18 +1,3 @@
-  
-/*   =================================================================================       
-     The Graph class contains functions and variables that have been created to draw 
-     graphs. Here is a quick list of functions within the graph class:
-          
-       Graph(int x, int y, int w, int h,color k)
-       DrawAxis()
-       Bar([])
-       smoothLine([][])
-       DotGraph([][])
-       LineGraph([][]) 
-     
-     =================================================================================*/   
-
-    
     class Graph 
     {
       
@@ -164,70 +149,6 @@
           }
           
  
-      }
-      
-      
-   /*  =========================================================================================
-       Bar graph
-       ==========================================================================================  */   
-      
-      void Bar(float[] a ,int from, int to) {
-        
-         
-          stroke(GraphColor);
-          fill(GraphColor);
-          
-          if(from<0){                                      // If the From or To value is out of bounds 
-           for (int x=0; x<a.length; x++){                 // of the array, adjust them 
-               rect(int(xPos+x*float(Width)/(a.length)),
-                    yPos+Height-2,
-                    Width/a.length-2,
-                    -a[x]/(yMax-yMin)*Height);
-                 }
-          }
-          
-          else {
-          for (int x=from; x<to; x++){
-            
-            rect(int(xPos+(x-from)*float(Width)/(to-from)),
-                     yPos+Height-2,
-                     Width/(to-from)-2,
-                     -a[x]/(yMax-yMin)*Height);
-                     
-    
-          }
-          }
-          
-      }
-  void Bar(float[] a ) {
-  
-              stroke(GraphColor);
-          fill(GraphColor);
-    
-  for (int x=0; x<a.length; x++){                 // of the array, adjust them 
-               rect(int(xPos+x*float(Width)/(a.length)),
-                    yPos+Height-2,
-                    Width/a.length-2,
-                    -a[x]/(yMax-yMin)*Height);
-                 }
-          }
-  
-  
-   /*  =========================================================================================
-       Dot graph
-       ==========================================================================================  */   
-       
-        void DotGraph(float[] x ,float[] y) {
-          
-         for (int i=0; i<x.length; i++){
-                    strokeWeight(2);stroke(GraphColor);noFill();smooth();
-           ellipse(
-                   xPos+(x[i]-x[0])/(x[x.length-1]-x[0])*Width,
-                   yPos+Height-(y[i]/(yMax-yMin)*Height)+(yMin)/(yMax-yMin)*Height,
-                   2,2
-                   );
-         }
-                             
       }
       
    /*  =========================================================================================
