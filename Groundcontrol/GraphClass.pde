@@ -1,4 +1,6 @@
-    class Graph 
+   // Change from https://github.com/sebnil/RealtimePlotter
+   
+   class Graph 
     {
       
       boolean Dot=true;            // Draw dots at each data point if true
